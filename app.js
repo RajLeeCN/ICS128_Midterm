@@ -182,19 +182,27 @@ loginButton.addEventListener("click", () => {
     // logoutButton.classList.remove("d-none");
     loginForm.classList.remove("d-none");
 })
-
-// logoutButton.addEventListener("click", () => {
-//     logoutButton.classList.add("d-none");
-//     document.getElementById("cardsDisplay").classList.add("d-none");
-//     loginButton.classList.remove("d-none");
-// })
-
+// add event listener to the login button, so it disappear after clicking
 
 let removeCard = (cardNumber) => {
-    userArray.splice(cardNumber);
-    console.log("hello");
-    console.log(userArray);
+    $(`#card${cardNumber}`).fadeOut("slow", () => {
+        $(this).remove();
+    });
+    userArray.splice(cardNumber, 1);
+    updateUsers();
 }
+// using JQuery to fadeout the deleted user, and use a updateUsers function to reload the page.
+
+let updateUsers = () => {
+    cardsDisplay.innerHTML = "";
+    displayAdmin();
+    loadUsers();
+    for (let i = 0; i < userArray.length; i++) {
+        document.getElementById(`card${i}`).classList.remove("d-none");
+    }
+}
+// after admin deleting the users, user updateUsers function to reload the page; cardsDisplay.innerHtml = "" is the key here, it can wipe off everything on the webpage
+
 
 const nameToIndexMapping = {
     user1: 3,
@@ -209,24 +217,21 @@ const nameToIndexMapping = {
     user10: 12,
     user11: 13,
     user12: 14,
-    user13:15
-
-    // Add more mappings as needed
+    user13: 15
+    //create an object, so that we can map the relationship between indexes and users
 };
 
-function displayCardForUser(userInput) {
+let displayCardForUser = (userInput) => {
     // Check if userInput exists in the mapping
     const index = nameToIndexMapping[userInput];
     if (index !== undefined) {
         // Display the card for this index
         displayCard(index);
-    } else if (userInput.startsWith('admin')) {
-        // If admin, display all user cards
-        displayAllUserCards();
     }
 }
+//relate nameToIndexMapping with displayCard
 
-function displayCard(index) {
+let displayCard = (index) => {
     const user = userArray[index];
     const cardHtml = `
         <div class="col-2 mt-3">
@@ -244,52 +249,11 @@ function displayCard(index) {
         </div>`;
     cardsDisplay.innerHTML += cardHtml;
 }
+//display the specific user card
 
-loginForm.addEventListener("click", function (event) {
-    event.preventDefault();
-    if (firstNameTest.test(firstName.value)) {
-        firstName.classList.remove("is-invalid");
-        firstNameVerify = true;
-    } else {
-        firstName.classList.add("is-invalid");
-    }
-
-    if (firstNameVerify) {
-        document.getElementById("loginForm").setAttribute("class", "was-validated");
-        submitButton.setAttribute("data-bs-dismiss", "modal");
-        let myModal = bootstrap.Modal.getInstance(loginModal);
-        myModal.hide();
-        //
-        if (firstName.value === "user1") {
-            displayCardForUser(firstName.value);
-        }
-        else if (firstName.value === "user2") {
-            displayCardForUser(firstName.value);
-        } else if (firstName.value === "user3") {
-            displayCardForUser(firstName.value);
-        } else if (firstName.value === "user4") {
-            displayCardForUser(firstName.value);
-        } else if (firstName.value === "user5") {
-            displayCardForUser(firstName.value);
-        } else if (firstName.value === "user6") {
-            displayCardForUser(firstName.value);
-        } else if (firstName.value === "user7") {
-            displayCardForUser(firstName.value);
-        } else if (firstName.value === "user8") {
-            displayCardForUser(firstName.value);
-        } else if (firstName.value === "user9") {
-            displayCardForUser(firstName.value);
-        } else if (firstName.value === "user10") {
-            displayCardForUser(firstName.value);
-        } else if (firstName.value === "user11") {
-            displayCardForUser(firstName.value);
-        } else if (firstName.value === "user12") {
-            displayCardForUser(firstName.value);
-        } else if (firstName.value === "user13") {
-            displayCardForUser(firstName.value);
-        } else if (firstName.value === "admin1" || firstName.value === "admin2" || firstName.value === "admin3") {
-            for (let i = 3; i < userArray.length; i++) {
-                const card = `
+let loadUsers = () => {
+    for (let i = 3; i < userArray.length; i++) {
+        const card = `
             <div class="col-2 mt-3">
                 <div class="card d-none" id = "card${i}">
                     <div class="card-header">
@@ -301,14 +265,40 @@ loginForm.addEventListener("click", function (event) {
                         Last Name: ${userArray[i].lastName}<br>
                         Email Address: ${userArray[i].email}<br>
                     </div>
-                    <button class="btn btn-secondary" onclick="removeCard(3)">Alter</button>
+                    <button class="btn btn-secondary" onclick="removeCard(${i})" >Alter</button>
                 </div>
             </div>`;
-                cardsDisplay.innerHTML += card;
-            }
+        cardsDisplay.innerHTML += card;
+    }
+}
+
+//if user input admin, then call loadUsers function to display all the users
+
+loginForm.addEventListener("click", function (event) {
+    event.preventDefault();
+    if (firstNameTest.test(firstName.value)) {
+        firstName.classList.remove("is-invalid");
+        firstNameVerify = true;
+    } else {
+        firstName.classList.add("is-invalid");
+    }
+    if (firstNameVerify) {
+        document.getElementById("loginForm").setAttribute("class", "was-validated");
+        submitButton.setAttribute("data-bs-dismiss", "modal");
+        let myModal = bootstrap.Modal.getInstance(loginModal);
+        myModal.hide();
+        //make sure the modal close after clicking submit
+        if (firstName.value === "user1" || firstName.value === "user2" || firstName.value === "user3" || firstName.value === "user4" || firstName.value === "user5" ||
+            firstName.value === "user6" || firstName.value === "user7" || firstName.value === "user8" || firstName.value === "user9" || firstName.value === "user10" ||
+            firstName.value === "user11" || firstName.value === "user12" || firstName.value === "user13") {
+            displayCardForUser(firstName.value);
+        } else if (firstName.value === "admin1" || firstName.value === "admin2" || firstName.value === "admin3") {
+            loadUsers();
         }
     }
 })
+// add event listener on the loginForm, when the input value is user1 to user13, load the specific user, if it's admin, then load all users
+
 
 loginModal.addEventListener("hidden.bs.modal", event => {
     document.getElementById("cardsDisplay").classList.remove("d-none");
